@@ -5,8 +5,10 @@ Create a Kubernetes environment for learning CKA.
 ## Introduction
 
 This config can be is used for experimenting with Kubernetes.
-You need Virtual Box and Vagrant for the installation of the virtual machines
+You need Virtual Box and Vagrant for the installation of the virtual machines:
+
 https://www.vagrantup.com/downloads.html
+
 https://www.virtualbox.org/wiki/Downloads
 
 ## Installing the Boxes
