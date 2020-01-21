@@ -71,6 +71,11 @@ kube-scheduler-k8smaster                   1/1     Running   0          32s
 
 # Join any number of worker nodes by running the following on each as root:
 
+cd ../k8sworker
+vagrant ssh
+sudo -i 
+
+# Get the following information out of the kubeadm-init.out for joining the worker in the cluster.
 kubeadm join k8smaster:6443 --token pzybeg.5ebv6ct0ts7q0dde \
     --discovery-token-ca-cert-hash sha256:b8bac2cb45f9e1e1c9db53dded9be20b3304462dc2586fe7ad5418e034013a58 
 ```
