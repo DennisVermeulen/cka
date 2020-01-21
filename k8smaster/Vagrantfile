@@ -1,0 +1,47 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.hostname = "k8smaster"
+
+   config.vm.network "private_network", ip: "192.168.33.20"
+   config.vm.provider "virtualbox" do |vb|
+     vb.memory = "4096"
+     vb.cpus = "2"
+   end
+
+   config.vm.provision "shell", inline: <<-SHELL
+     apt-get update && apt-get upgrade -y     
+     swapoff -a
+     echo 192.168.33.20 k8smaster >> /etc/hosts
+     echo 192.168.33.21 k8sworker >> /etc/hosts
+     rm -rf /etc/resolv.conf
+     echo nameserver 8.8.8.8 >> /etc/resolv.conf
+     echo nameserver 8.8.4.4 >> /etc/resolv.conf
+     apt-get install -y docker.io
+     systemctl enable docker.service
+     apt-get install -y vim
+     touch /etc/apt/sources.list.d/kubernetes.list
+     echo deb http://apt.kubernetes.io/ kubernetes-xenial main >> /etc/apt/sources.list.d/kubernetes.list
+     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+     apt-get update
+     apt-get install -y kubeadm=1.16.1-00 kubelet=1.16.1-00 kubectl=1.16.1-00
+     apt-mark hold kubelet kubeadm kubect
+     wget https://tinyurl.com/yb4xturm -O /root/rbac-kdd.yaml
+     wget https://tinyurl.com/y2vqsobb -O /root/calico.yaml
+     source <(kubectl completion bash)
+     echo "source <(kubectl completion bash)" >> ~/.bashrc
+     cat << EOF >/root/kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "192.168.33.20"
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: 1.16.1 #<-- Use the word stable for newest version
+controlPlaneEndpoint: "k8smaster:6443" #<-- Use the node alias not the IP
+networking:
+  podSubnet: 192.200.0.0/16
+EOF
+   SHELL
+end
